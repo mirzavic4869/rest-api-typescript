@@ -1,25 +1,24 @@
 import { Request, Response } from "express";
 import { createProductValidation } from "../validations/product.validation";
 import { logger } from "../utils/logger";
+import { getProductFromDB } from "../services/product.service";
 
-export const getProduct = (req: Request, res: Response) => {
-	const products = [
-		{
-			name: "Tas",
-			price: 399000,
-		},
-		{
-			name: "Celana",
-			price: 299000,
-		},
-	];
+interface ProductType {
+	product_id: string;
+	name: string;
+	price: number;
+	size: string;
+}
+
+export const getProduct = async (req: Request, res: Response) => {
+	const products: any = await getProductFromDB();
 
 	const {
 		params: { name },
 	} = req;
 
 	if (name) {
-		const filterProduct = products.filter((product) => {
+		const filterProduct = products.filter((product: ProductType) => {
 			if (product.name === name) {
 				return product;
 			}
@@ -31,11 +30,9 @@ export const getProduct = (req: Request, res: Response) => {
 		logger.info("Success get data");
 		return res.status(200).send({ status: true, statusCode: 200, data: filterProduct[0] });
 	}
-
 	logger.info("Success get data");
 	return res.status(200).send({ status: true, statusCode: 200, data: products });
 };
-
 export const createProduct = (req: Request, res: Response) => {
 	const { error, value } = createProductValidation(req.body);
 
